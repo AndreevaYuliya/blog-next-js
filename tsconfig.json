@@ -18,8 +18,19 @@
         "name": "next"
       }
     ],
+    "baseUrl": "src/",
     "paths": {
-      "@/*": ["./*"]
+      "@/app/*": ["app/*"],
+      "@/components/*": ["components/*"],
+      "@/config/*": ["config/*"],
+      "@/contexts/*": ["contexts/*"],
+      "@/features/*": ["features/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/lib/*": ["lib/*"],
+      "@/providers/*": ["providers/*"],
+      "@/stores/*": ["stores/*"],
+      "@/styles/*": ["styles/*"],
+      "@/types/*": ["types/*"]
     }
   },
   "include": [
@@ -32,3 +43,4 @@
   ],
   "exclude": ["node_modules"]
 }
+
