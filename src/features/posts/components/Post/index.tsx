@@ -5,10 +5,12 @@ import CommentStripe from "@/features/comments/components/CommentStripe";
 import PostActions from "@/features/posts/components/Post/PostActions.client";
 
 import styles from "./styles.module.css";
+import { User } from "@/types/User";
 
 type Props = GetExhibitResponse & {
   isFirstPost: boolean;
   isLastPost: boolean;
+  currentUser?: User | null;
 };
 
 const Post = (props: Props) => {
@@ -20,6 +22,7 @@ const Post = (props: Props) => {
     commentCount,
     isFirstPost,
     isLastPost,
+    currentUser,
   } = props;
 
   const imageSrc = imageUrl
@@ -40,7 +43,11 @@ const Post = (props: Props) => {
           <p className={styles.date}>{new Date(createdAt).toLocaleString()}</p>
         </div>
 
-        <PostActions postId={props.id} ownerId={user.id} />
+        <PostActions
+          postId={props.id}
+          ownerId={user.id}
+          currentUser={currentUser}
+        />
       </div>
 
       <div>
@@ -54,10 +61,13 @@ const Post = (props: Props) => {
         <p className={styles.description}>{description}</p>
       </div>
 
-      <CommentStripe postId={String(props.id)} commentCount={commentCount} />
+      <CommentStripe
+        postId={String(props.id)}
+        commentCount={commentCount}
+        currentUser={currentUser}
+      />
     </article>
   );
 };
 
 export default Post;
-

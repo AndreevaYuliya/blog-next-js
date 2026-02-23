@@ -41,6 +41,7 @@ const PostsPageLayout: FC<PostsPageLayoutProps> = (props) => {
             {...post}
             isFirstPost={index === 0}
             isLastPost={index === initialPosts.data.length - 1}
+            currentUser={currentUser}
           />
         ))}
       </ContentContainer>

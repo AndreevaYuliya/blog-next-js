@@ -17,7 +17,6 @@ import { Form, Formik } from "formik";
 import { object, string } from "yup";
 
 import { GetCommentsResponse } from "@/types/CommentsApi";
-import { useAppSelector } from "@/stores/store";
 import { useAlertContext } from "@/contexts/AlertContext";
 import { createComment } from "@/features/comments/services/commentsActions";
 
@@ -28,6 +27,7 @@ import styles from "./styles";
 
 type Props = {
   postId: string;
+  currentUserInitial: string;
   mutateComments: (
     updateComments: (prev?: GetCommentsResponse) => GetCommentsResponse,
   ) => void;
@@ -38,9 +38,7 @@ const CommentSchema = object({
 });
 
 const NewCommentForm: FC<Props> = (props) => {
-  const { postId, mutateComments } = props;
-
-  const currentUser = useAppSelector((s) => s.user.user?.username);
+  const { postId, currentUserInitial, mutateComments } = props;
 
   const { showAlert } = useAlertContext();
 
@@ -85,7 +83,7 @@ const NewCommentForm: FC<Props> = (props) => {
         <Form>
           <Box sx={styles.inputContainer}>
             <Avatar sx={styles.avatar}>
-              {currentUser?.[0]?.toUpperCase()}
+              {currentUserInitial.toUpperCase()}
             </Avatar>
 
             <StyledField
@@ -127,4 +125,3 @@ const NewCommentForm: FC<Props> = (props) => {
 };
 
 export default NewCommentForm;
-

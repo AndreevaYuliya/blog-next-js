@@ -6,23 +6,23 @@ import { useRouter } from "next/navigation";
 import { useRequest } from "ahooks";
 
 import { useAlertContext } from "@/contexts/AlertContext";
-import { useAppSelector } from "@/stores/store";
 import { deleteExhibit } from "@/features/posts/services/exhibitActions";
 import DeleteButton from "@/components/ui/DeleteButton";
+import { User } from "@/types/User";
 
 type Props = {
   postId: number;
   ownerId: number;
+  currentUser?: User | null;
 };
 
 const PostActions: FC<Props> = (props) => {
-  const { postId, ownerId } = props;
+  const { postId, ownerId, currentUser } = props;
 
   const { showAlert } = useAlertContext();
   const router = useRouter();
 
-  const currentUserId = useAppSelector((s) => s.user.user?.id);
-  const isOwner = currentUserId === ownerId;
+  const isOwner = currentUser?.id === ownerId;
 
   const { runAsync } = useRequest(() => deleteExhibit({ id: String(postId) }), {
     manual: true,
@@ -59,4 +59,3 @@ const PostActions: FC<Props> = (props) => {
 };
 
 export default PostActions;
-

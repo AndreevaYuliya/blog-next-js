@@ -4,7 +4,10 @@ import PostsPageLayout, {
   PostsPageLayoutProps,
 } from "@/components/templates/PostsPageLayout";
 
-type Props = Omit<PostsPageLayoutProps, "title">;
+type Props = { currentUserId: number | null } & Omit<
+  PostsPageLayoutProps,
+  "title"
+>;
 
 const HomePage: FC<Props> = (props) => {
   return <PostsPageLayout title="My Posts" {...props} />;

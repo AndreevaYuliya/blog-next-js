@@ -13,4 +13,3 @@ export const COMMENTS_URL = (exhibitId: string) =>
 
 export const DELETE_COMMENT_URL = (exhibitId: string, commentId: string) =>
   `/api/exhibits/${exhibitId}/comments/${commentId}`;
-

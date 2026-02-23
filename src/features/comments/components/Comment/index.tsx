@@ -27,7 +27,7 @@ const Comment: FC<Props> = (props) => {
   const { showAlert } = useAlertContext();
 
   const currentUserId = useAppSelector((s) => s.user.user?.id);
-  const isOwner = currentUserId === user.id;
+  const isOwner = currentUserId === user?.id;
 
   const handleDelete = async () => {
     if (!isOwner) {
@@ -57,11 +57,11 @@ const Comment: FC<Props> = (props) => {
 
   return (
     <Box sx={styles.container}>
-      <Avatar sx={styles.avatar}>{user.username?.[0]?.toUpperCase()}</Avatar>
+      <Avatar sx={styles.avatar}>{user?.username?.[0]?.toUpperCase()}</Avatar>
 
       <Box flex={1}>
         <Typography variant="h6" fontWeight="bold" color={colors.green[400]}>
-          {user.username}
+          {user?.username}
         </Typography>
 
         <Typography
@@ -85,4 +85,3 @@ const Comment: FC<Props> = (props) => {
 };
 
 export default Comment;
-

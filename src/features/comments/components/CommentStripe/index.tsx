@@ -18,18 +18,19 @@ import { getComments } from "@/features/comments/services/commentsActions";
 import NewCommentForm from "@/features/comments/components/NewCommentForm";
 import Comment from "@/features/comments/components/Comment";
 
-import { useAppSelector } from "@/stores/store";
 import { useAlertContext } from "@/contexts/AlertContext";
 
 import styles from "./styles";
+import { User } from "@/types/User";
 
 type Props = {
   postId: string;
   commentCount: number;
+  currentUser?: User | null;
 };
 
 const CommentStripe: FC<Props> = (props) => {
-  const { postId, commentCount } = props;
+  const { postId, commentCount, currentUser } = props;
 
   const [expanded, setExpanded] = useState(false);
 
@@ -44,7 +45,7 @@ const CommentStripe: FC<Props> = (props) => {
     manual: true,
   });
 
-  const isAuth = Boolean(useAppSelector((s) => s.user.user));
+  const isAuth = Boolean(currentUser);
 
   const isDisabled = isLoading;
 
@@ -101,7 +102,11 @@ const CommentStripe: FC<Props> = (props) => {
 
         {isAuth && (
           <Box sx={styles.formContainer}>
-            <NewCommentForm postId={postId} mutateComments={mutateComments} />
+            <NewCommentForm
+              postId={postId}
+              currentUserInitial={currentUser?.username?.[0] ?? ""}
+              mutateComments={mutateComments}
+            />
           </Box>
         )}
       </Accordion>
@@ -110,4 +115,3 @@ const CommentStripe: FC<Props> = (props) => {
 };
 
 export default CommentStripe;
-

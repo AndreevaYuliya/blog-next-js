@@ -25,6 +25,8 @@ const Page: FC<Props> = async (props) => {
 
   const token = (await cookies()).get("token")?.value;
 
+  let currentUser: GetUserResponse | null = null;
+
   if (!token) {
     redirect("/login");
   }
@@ -36,11 +38,10 @@ const Page: FC<Props> = async (props) => {
     cache: "no-store",
   });
 
-  const initialPosts = res.ok ? await res.json() : null;
+  const raw = await res.text();
 
+  const initialPosts = res.ok ? JSON.parse(raw) : null;
   const errorMessage = res.ok ? null : "Error loading posts";
-
-  let currentUser: GetUserResponse | null = null;
 
   const userRes = await fetch(USER_PROFILE_URL, {
     headers: {
@@ -61,9 +62,9 @@ const Page: FC<Props> = async (props) => {
       limit={limit}
       errorMessage={errorMessage}
       currentUser={currentUser}
+      currentUserId={currentUser?.id ?? null}
     />
   );
 };
 
 export default Page;
-
