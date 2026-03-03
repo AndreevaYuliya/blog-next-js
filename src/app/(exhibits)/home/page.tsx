@@ -3,9 +3,10 @@ import { FC } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
-import { MY_POSTS_URL, USER_PROFILE_URL } from "@/config/constants/server";
-import { GetUserResponse } from "@/types/UserApi";
-import HomePage from "@/components/templates/HomePage";
+import { MY_POSTS_URL } from "@/config/constants/server";
+import { getCurrentUser } from "@/lib/server/auth";
+import { getSession } from "@/lib/server/sessionStore";
+import HomePage from "@/components/templates/PostsPageLayout";
 
 type Props = {
   searchParams: Promise<{ page?: string }>;
@@ -23,36 +24,34 @@ const Page: FC<Props> = async (props) => {
   const page = Math.max(parseInt(searchParamsObj.page ?? "1", 10) || 1, 1);
   const limit = 10;
 
-  const token = (await cookies()).get("token")?.value;
+  const sid = (await cookies()).get("sid")?.value;
 
-  let currentUser: GetUserResponse | null = null;
+  if (!sid) {
+    redirect("/login");
+  }
 
-  if (!token) {
+  const session = await getSession(sid);
+
+  if (!session) {
     redirect("/login");
   }
 
   const res = await fetch(`${MY_POSTS_URL}?page=${page}&limit=${limit}`, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${session.accessToken}`,
     },
     cache: "no-store",
   });
 
-  const raw = await res.text();
+  const initialPosts = res.ok ? await res.json().catch(() => null) : null;
 
-  const initialPosts = res.ok ? JSON.parse(raw) : null;
-  const errorMessage = res.ok ? null : "Error loading posts";
+  const errorMessage = res.ok
+    ? initialPosts
+      ? null
+      : "Invalid server response"
+    : "Error loading posts";
 
-  const userRes = await fetch(USER_PROFILE_URL, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-
-  if (userRes.ok) {
-    currentUser = await userRes.json();
-  }
+  const currentUser = await getCurrentUser();
 
   return (
     <HomePage
@@ -62,7 +61,6 @@ const Page: FC<Props> = async (props) => {
       limit={limit}
       errorMessage={errorMessage}
       currentUser={currentUser}
-      currentUserId={currentUser?.id ?? null}
     />
   );
 };

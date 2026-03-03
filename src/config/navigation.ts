@@ -4,7 +4,6 @@ const routes = {
   login: "/login",
   register: "/register",
   newPost: "/newPost",
-  notFound: "/404",
 };
 
 export default routes;

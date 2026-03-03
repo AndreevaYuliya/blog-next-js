@@ -1,23 +1,47 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 import { DELETE_COMMENT_URL } from "@/config/constants/server";
 
+import {
+  TIMEOUT_MS,
+  jsonError,
+  parseUpstreamJson,
+  mapFetchError,
+} from "@/lib/server/apiProxy";
+import { getAccessToken } from "@/lib/server/getAccessToken";
+
 export const DELETE = async (
-  _req: Request,
-  { params }: { params: Promise<{ id: string; commentId: string }> },
+  req: Request,
+  {
+    params,
+  }: {
+    params: Promise<{ id: string; commentId: string }>;
+  },
 ) => {
-  const { id, commentId } = await params;
-  const token = (await cookies()).get("token")?.value;
+  try {
+    const { id, commentId } = await params;
+    const token = await getAccessToken(req);
 
-  if (!token) {
-    return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
+    if (!token) {
+      return jsonError(401, "Not authenticated", "UNAUTHORIZED");
+    }
+
+    const apiRes = await fetch(DELETE_COMMENT_URL(id, commentId), {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+
+    if (!apiRes.ok) {
+      const parsed = await parseUpstreamJson(apiRes);
+
+      if (parsed.ok) {
+        return NextResponse.json(parsed.data, { status: apiRes.status });
+      }
+    }
+
+    return NextResponse.json(null, { status: apiRes.status });
+  } catch (error) {
+    return mapFetchError(error);
   }
-
-  const apiRes = await fetch(DELETE_COMMENT_URL(id, commentId), {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  return NextResponse.json(null, { status: apiRes.status });
 };

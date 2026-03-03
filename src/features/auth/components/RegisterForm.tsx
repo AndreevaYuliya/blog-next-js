@@ -28,6 +28,8 @@ import routes from "@/config/navigation";
 
 import { StyledField, StyledForm } from "@/styles/muiStyles";
 import commonStyles from "@/styles/commonStyles";
+import { isAxiosError } from "axios";
+import { setAuthTokens } from "@/lib/auth/tokenStorage";
 
 const RegisterSchema = object({
   username: string()
@@ -65,14 +67,16 @@ const RegisterForm: FC = () => {
 
   const onSubmit = async (values: InferType<typeof RegisterSchema>) => {
     try {
-      const userData = {
-        username: values.username,
+      const payload = {
+        username: values.username.trim(),
         password: values.password,
       };
 
-      await registerUser(userData);
+      await registerUser(payload);
 
-      const login = await logInUser(userData);
+      const login = await logInUser(payload);
+
+      setAuthTokens(login.access_token, login.refresh_token);
 
       showAlert("Registration successful", "success");
 
@@ -80,10 +84,16 @@ const RegisterForm: FC = () => {
 
       router.push(routes.home);
     } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message || "Registration failed. Please try again."
-          : "Registration failed. Please try again.";
+      let message = "Registration failed. Please try again.";
+
+      if (isAxiosError(error)) {
+        message =
+          (error.response?.data as { message?: string } | undefined)?.message ||
+          error.message ||
+          message;
+      } else if (error instanceof Error) {
+        message = error.message || message;
+      }
 
       showAlert(message, "error");
     }
@@ -99,7 +109,7 @@ const RegisterForm: FC = () => {
       validationSchema={RegisterSchema}
       onSubmit={onSubmit}
     >
-      {({ submitForm, isSubmitting, touched, errors, isValid, dirty }) => (
+      {({ isSubmitting, touched, errors, isValid, dirty }) => (
         <StyledForm>
           <StyledField
             component={TextField}
@@ -189,7 +199,6 @@ const RegisterForm: FC = () => {
             color="success"
             sx={commonStyles.button}
             disabled={isSubmitting || !isValid || !dirty}
-            onClick={submitForm}
           >
             {isSubmitting ? (
               <CircularProgress size={24} color="success" />
@@ -223,4 +232,3 @@ const RegisterForm: FC = () => {
 };
 
 export default RegisterForm;
-

@@ -1,31 +1,47 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
 import { USER_PROFILE_URL } from "@/config/constants/server";
+import {
+  jsonError,
+  mapFetchError,
+  parseUpstreamJson,
+  TIMEOUT_MS,
+} from "@/lib/server/apiProxy";
+import { getAccessToken } from "@/lib/server/getAccessToken";
 
-export const GET = async () => {
-  const token = (await cookies()).get("token")?.value;
+export const GET = async (req: Request) => {
+  try {
+    const token = await getAccessToken(req);
 
-  if (!token) {
-    return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
+    if (!token) {
+      return jsonError(401, "Not authenticated", "UNAUTHORIZED");
+    }
+
+    const apiRes = await fetch(USER_PROFILE_URL, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+
+    const parsed = await parseUpstreamJson<{
+      id: number;
+      username: string;
+      message?: string;
+    }>(apiRes);
+
+    if (!parsed.ok) {
+      return jsonError(502, "Invalid upstream response", parsed.code);
+    }
+
+    if (!apiRes.ok) {
+      return jsonError(
+        apiRes.status,
+        parsed.data.message ?? "Failed to load profile",
+        "PROFILE_FETCH_FAILED",
+      );
+    }
+
+    return NextResponse.json(parsed.data, { status: 200 });
+  } catch (error) {
+    return mapFetchError(error);
   }
-
-  const apiRes = await fetch(USER_PROFILE_URL, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!apiRes.ok) {
-    return NextResponse.json(
-      { message: "Failed to fetch user" },
-      { status: apiRes.status },
-    );
-  }
-
-  const data = await apiRes.json();
-
-  return NextResponse.json(data);
 };
-

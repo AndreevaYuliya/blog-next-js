@@ -6,18 +6,28 @@ import AppProviders from "@/providers/AppProviders";
 
 import "./globals.css";
 
+import ControlBar from "@/components/sections/ControlBar";
+import { getCurrentUser } from "@/lib/server/auth";
+import PageContainer from "@/components/sections/PageContainer";
+
 type Props = {
   children: ReactNode;
 };
 
-const RootLayout: FC<Props> = (props) => {
+const RootLayout: FC<Props> = async (props) => {
   const { children } = props;
+
+  const initialUser = await getCurrentUser();
 
   return (
     <html lang="en">
       <body>
         <AppRouterCacheProvider options={{ key: "mui" }}>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders initialUser={initialUser}>
+            <ControlBar />
+
+            <PageContainer>{children}</PageContainer>
+          </AppProviders>
         </AppRouterCacheProvider>
       </body>
     </html>
@@ -25,4 +35,3 @@ const RootLayout: FC<Props> = (props) => {
 };
 
 export default RootLayout;
-

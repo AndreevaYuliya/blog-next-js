@@ -2,11 +2,15 @@
 
 import { FC } from "react";
 
-import RegisterPage from "@/components/templates/RegisterPage";
+import ContentContainer from "@/components/sections/ContentContainer";
+import RegisterForm from "@/features/auth/components/RegisterForm";
 
 const Page: FC = () => {
-  return <RegisterPage />;
+  return (
+    <ContentContainer>
+      <RegisterForm />
+    </ContentContainer>
+  );
 };
 
 export default Page;
-

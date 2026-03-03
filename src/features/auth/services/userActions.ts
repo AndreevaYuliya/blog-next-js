@@ -10,6 +10,7 @@ import {
 
 import {
   AUTH_LOGIN_URL,
+  AUTH_LOGOUT_URL,
   AUTH_ME_URL,
   AUTH_REGISTER_URL,
 } from "@/config/constants/client";
@@ -31,7 +32,7 @@ export const logInUser = async (
 };
 
 export const logOutUser = async () => {
-  await axiosInstance.post("/api/auth/logout");
+  await axiosInstance.post(AUTH_LOGOUT_URL);
 };
 
 export const getUser = async (): Promise<GetUserResponse | null> => {
@@ -39,4 +40,3 @@ export const getUser = async (): Promise<GetUserResponse | null> => {
 
   return userData.data;
 };
-

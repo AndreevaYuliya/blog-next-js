@@ -25,32 +25,27 @@ import {
 import routes from "@/config/navigation";
 import { useAppDispatch, useAppSelector } from "@/stores/store";
 import { clearUser } from "@/stores/slices/userSlice";
-import { User } from "@/types/User";
 
 import { logOutUser } from "@/features/auth/services/userActions";
 
 import { StyledMenuItem } from "@/styles/muiStyles";
 
 import styles from "./styles";
+import { clearAuthTokens } from "@/lib/auth/tokenStorage";
 
 type Props = {
-  title: string;
   handleScrollTop?: () => void;
-  initialUser?: User | null;
 };
 
 const ControlBar: FC<Props> = (props) => {
-  const { title, handleScrollTop, initialUser } = props;
+  const { handleScrollTop } = props;
 
   const router = useRouter();
   const pathname = usePathname();
 
   const storeUser = useAppSelector((state) => state.user.user);
-  const resolvedUser = storeUser ?? initialUser ?? null;
-  const isAuthenticated = Boolean(resolvedUser);
-  const user = resolvedUser?.username;
-
-  const location = { pathname };
+  const isAuthenticated = Boolean(storeUser);
+  const username = storeUser?.username;
 
   const dispatch = useAppDispatch();
 
@@ -66,6 +61,29 @@ const ControlBar: FC<Props> = (props) => {
     "Create New Post": routes.newPost,
   };
 
+  let title = "";
+
+  switch (pathname) {
+    case routes.home:
+      title = "My Posts";
+      break;
+
+    case routes.newPost:
+      title = "Create New Post";
+      break;
+
+    case routes.login:
+      title = "Login";
+      break;
+    case routes.register:
+      title = "Register";
+      break;
+
+    default:
+      title = "All Posts";
+      break;
+  }
+
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -75,11 +93,17 @@ const ControlBar: FC<Props> = (props) => {
   };
 
   const handleLogOut = async () => {
-    await logOutUser();
+    try {
+      await logOutUser();
 
-    dispatch(clearUser());
+      clearAuthTokens();
 
-    router.push(routes.stripe);
+      dispatch(clearUser());
+
+      router.push(routes.stripe);
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   return (
@@ -119,7 +143,7 @@ const ControlBar: FC<Props> = (props) => {
           >
             {pages.map((page) => {
               const route = pageRoutes[page];
-              const isActive = route ? location.pathname === route : false;
+              const isActive = route ? pathname === route : false;
 
               return (
                 <StyledMenuItem
@@ -139,7 +163,7 @@ const ControlBar: FC<Props> = (props) => {
         <Box sx={styles.buttonsContainer}>
           {pages.map((page) => {
             const route = pageRoutes[page];
-            const isActive = route ? location.pathname === route : false;
+            const isActive = route ? pathname === route : false;
 
             return (
               <Button
@@ -155,14 +179,14 @@ const ControlBar: FC<Props> = (props) => {
         </Box>
 
         <Box sx={styles.userContainer}>
-          {user && (
+          {username && (
             <>
               <Typography
                 component="span"
                 color={colors.common.white}
                 fontWeight="bold"
               >
-                {user}
+                {username}
               </Typography>
 
               <Divider
@@ -190,4 +214,3 @@ const ControlBar: FC<Props> = (props) => {
 };
 
 export default ControlBar;
-

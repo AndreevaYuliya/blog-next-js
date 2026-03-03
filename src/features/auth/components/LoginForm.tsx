@@ -27,6 +27,8 @@ import { useAlertContext } from "@/contexts/AlertContext";
 
 import { StyledField, StyledForm } from "@/styles/muiStyles";
 import commonStyles from "@/styles/commonStyles";
+import { isAxiosError } from "axios";
+import { setAuthTokens } from "@/lib/auth/tokenStorage";
 
 const LoginSchema = object({
   username: string()
@@ -54,18 +56,24 @@ const LoginForm: FC = () => {
 
   const onSubmit = async (values: InferType<typeof LoginSchema>) => {
     try {
-      const userData = { username: values.username, password: values.password };
+      const user = await logInUser(values);
 
-      const user = await logInUser(userData);
+      setAuthTokens(user.access_token, user.refresh_token);
 
       dispatch(setUser({ id: user.userId, username: user.userName }));
 
       router.push(routes.home);
     } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message || "Login failed. Please try again."
-          : "Login failed. Please try again.";
+      let message = "Login failed. Please try again.";
+
+      if (isAxiosError(error)) {
+        message =
+          (error.response?.data as { message?: string } | undefined)?.message ||
+          error.message ||
+          message;
+      } else if (error instanceof Error) {
+        message = error.message || message;
+      }
 
       showAlert(message, "error");
     }
@@ -80,7 +88,7 @@ const LoginForm: FC = () => {
       validationSchema={LoginSchema}
       onSubmit={onSubmit}
     >
-      {({ submitForm, isSubmitting, touched, errors, isValid, dirty }) => (
+      {({ isSubmitting, touched, errors, isValid, dirty }) => (
         <StyledForm>
           <StyledField
             component={TextField}
@@ -133,7 +141,6 @@ const LoginForm: FC = () => {
             color="success"
             disabled={isSubmitting || !isValid || !dirty}
             sx={commonStyles.button}
-            onClick={submitForm}
           >
             {isSubmitting ? (
               <CircularProgress size={24} color="success" />
@@ -162,4 +169,3 @@ const LoginForm: FC = () => {
 };
 
 export default LoginForm;
-

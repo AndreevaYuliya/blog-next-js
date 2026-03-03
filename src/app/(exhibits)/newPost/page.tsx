@@ -1,13 +1,14 @@
 "use client";
 
 import { FC } from "react";
-import LoginForm from "@/features/auth/components/LoginForm";
+
 import ContentContainer from "@/components/sections/ContentContainer";
+import NewPostForm from "@/features/posts/components/NewPostForm";
 
 const Page: FC = () => {
   return (
     <ContentContainer>
-      <LoginForm />
+      <NewPostForm />
     </ContentContainer>
   );
 };

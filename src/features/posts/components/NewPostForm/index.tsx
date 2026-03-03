@@ -71,14 +71,7 @@ const NewPostForm: FC = () => {
       validationSchema={PostSchema}
       onSubmit={onSubmit}
     >
-      {({
-        values,
-        dirty,
-        isSubmitting,
-        isValid,
-        submitForm,
-        setFieldValue,
-      }) => (
+      {({ values, dirty, isSubmitting, isValid, setFieldValue }) => (
         <StyledForm>
           <Button
             component="label"
@@ -124,7 +117,6 @@ const NewPostForm: FC = () => {
             color="success"
             disabled={isSubmitting || !isValid || !dirty}
             sx={commonStyles.button}
-            onClick={submitForm}
           >
             {isSubmitting ? (
               <CircularProgress size={24} color="success" />
@@ -139,4 +131,3 @@ const NewPostForm: FC = () => {
 };
 
 export default NewPostForm;
-

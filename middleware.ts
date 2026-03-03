@@ -2,13 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const middleware = (req: NextRequest) => {
-  const token = req.cookies.get("token")?.value;
+  const sid = req.cookies.get("sid")?.value;
 
-  if (!token) {
+  if (!sid) {
     const loginUrl = new URL("/login", req.url);
-
     loginUrl.searchParams.set("from", req.nextUrl.pathname);
-
     return NextResponse.redirect(loginUrl);
   }
 
@@ -16,8 +14,7 @@ const middleware = (req: NextRequest) => {
 };
 
 export const config = {
-  matcher: ["/", "/home", "/new-post/:path*"],
+  matcher: ["/home", "/newPost/:path*"],
 };
 
 export default middleware;
-

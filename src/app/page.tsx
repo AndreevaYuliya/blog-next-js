@@ -1,32 +1,10 @@
 import { FC } from "react";
 
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 
-import { EXHIBITS_URL, USER_PROFILE_URL } from "@/config/constants/server";
-import { GetUserResponse } from "@/types/UserApi";
-import StripePage from "@/components/templates/StripePage";
-
-const getCurrentUser = async (): Promise<GetUserResponse | null> => {
-  const token = (await cookies()).get("token")?.value;
-
-  if (!token) {
-    return null;
-  }
-
-  const res = await fetch(USER_PROFILE_URL, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    return null;
-  }
-
-  return res.json();
-};
+import { EXHIBITS_URL } from "@/config/constants/server";
+import StripePage from "@/components/templates/PostsPageLayout";
+import { getCurrentUser } from "@/lib/server/auth";
 
 type Props = {
   searchParams: Promise<{ page?: string }>;
@@ -66,4 +44,3 @@ const Page: FC<Props> = async (props) => {
 };
 
 export default Page;
-
